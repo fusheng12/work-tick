@@ -1,5 +1,5 @@
 <template>
-  <div class="project-card" :style="{ borderColor: project.color }">
+  <div class="project-card" :style="{ borderColor: project.color }" @click="$router.push(`/projects/${project.id}`)">
     <div class="card-header">
       <div class="color-dot" :style="{ background: project.color }"></div>
       <h3 class="project-name">{{ project.name }}</h3>
@@ -7,13 +7,7 @@
     <p v-if="project.description" class="project-desc">{{ project.description }}</p>
     <div class="card-footer">
       <span class="project-date">{{ formatDate(project.created_at) }}</span>
-      <div class="card-actions">
-        <button class="btn btn-primary btn-sm" @click="$emit('start', project.id)">
-          开始工作
-        </button>
-        <button class="btn btn-ghost btn-sm" @click="$emit('edit', project)">编辑</button>
-        <button class="btn btn-ghost btn-sm" @click="$router.push(`/projects/${project.id}`)">详情</button>
-      </div>
+      <button class="btn btn-ghost btn-sm" @click.stop="$emit('edit', project)">编辑</button>
     </div>
   </div>
 </template>
@@ -23,7 +17,6 @@ import type { Project } from '@/stores/projects'
 
 defineProps<{ project: Project }>()
 defineEmits<{
-  start: [projectId: number]
   edit: [project: Project]
 }>()
 
@@ -36,11 +29,11 @@ function formatDate(dateStr: string): string {
 .project-card {
   background: var(--bg-card);
   border-radius: var(--radius);
-  border-left: 4px solid;
   border: 1px solid var(--border);
   border-left: 4px solid;
   padding: 16px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
 .project-card:hover {
@@ -83,10 +76,5 @@ function formatDate(dateStr: string): string {
 .project-date {
   font-size: 12px;
   color: var(--text-muted);
-}
-
-.card-actions {
-  display: flex;
-  gap: 4px;
 }
 </style>

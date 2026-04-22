@@ -20,11 +20,8 @@
           <button v-if="task.status === 'in_progress'" class="action-btn resume" @click="$emit('resume', task)">
             继续
           </button>
-          <button class="action-btn" @click="$emit('expand', task)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-          </button>
           <button class="action-btn danger" @click="$emit('delete', task)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           </button>
         </div>
       </div>
@@ -57,7 +54,19 @@ const statusMap: Record<string, string> = {
 const statusLabel = statusMap[props.task.status] || props.task.status
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('zh-CN')
+  const d = new Date(dateStr)
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const target = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+  const diff = Math.floor((today.getTime() - target.getTime()) / 86400000)
+  const time = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+  const weekDays = ['日', '一', '二', '三', '四', '五', '六']
+
+  if (diff === 0) return `今天 ${time}`
+  if (diff === 1) return `昨天 ${time}`
+  if (diff < 7) return `周${weekDays[d.getDay()]} ${time}`
+  if (d.getMonth() === now.getMonth()) return `${d.getMonth() + 1}月${d.getDate()}日`
+  return `${d.getMonth() + 1}月${d.getDate()}日`
 }
 </script>
 
@@ -109,7 +118,7 @@ function formatDate(dateStr: string): string {
 .priority-dot.low { background: var(--success); }
 
 .card-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--text-primary);
   overflow: hidden;
@@ -118,8 +127,8 @@ function formatDate(dateStr: string): string {
 }
 
 .status-tag {
-  font-size: 11px;
-  padding: 1px 8px;
+  font-size: 12px;
+  padding: 2px 10px;
   border-radius: 10px;
   flex-shrink: 0;
   white-space: nowrap;
@@ -132,7 +141,7 @@ function formatDate(dateStr: string): string {
 
 .card-latest {
   margin-top: 6px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -162,19 +171,13 @@ function formatDate(dateStr: string): string {
 }
 
 .meta-date {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
 }
 
 .card-actions {
   display: flex;
-  gap: 2px;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-
-.task-card:hover .card-actions {
-  opacity: 1;
+  gap: 4px;
 }
 
 .action-btn {

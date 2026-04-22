@@ -43,7 +43,6 @@
         v-for="p in projects"
         :key="p.id"
         :project="p"
-        @start="startWork"
         @edit="editProject"
       />
     </div>
@@ -57,14 +56,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useProjectsStore, type Project } from '@/stores/projects'
-import { useTimerStore } from '@/stores/timer'
 import ProjectCard from '@/components/ProjectCard.vue'
 
-const router = useRouter()
 const projectsStore = useProjectsStore()
-const timerStore = useTimerStore()
 
 const showAddForm = ref(false)
 const editingProject = ref<Project | null>(null)
@@ -107,14 +102,6 @@ async function saveProject() {
   } catch (e) {
     alert('保存失败: ' + (e instanceof Error ? e.message : e))
   }
-}
-
-async function startWork(projectId: number) {
-  if (timerStore.hasActiveSession) {
-    await timerStore.stopSession()
-  }
-  await timerStore.startSession(projectId)
-  router.push('/active')
 }
 </script>
 

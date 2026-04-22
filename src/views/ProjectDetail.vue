@@ -30,64 +30,70 @@
         </div>
       </div>
 
-      <!-- Task List -->
-      <div class="task-list">
-        <TaskCard
-          v-for="task in filteredTasks"
-          :key="task.id"
-          :task="task"
-          :latest-milestone="taskLatestMap[task.id] || null"
-          @start="startWork"
-          @resume="resumeWork"
-          @edit="openEditTask"
-          @delete="confirmDeleteTask"
-          @expand="openTaskDetail"
-        />
-        <div v-if="filteredTasks.length === 0" class="empty-state">
-          <p>暂无任务</p>
-          <p class="sub">点击"新建任务"开始管理</p>
-        </div>
-      </div>
-
-      <!-- Task Detail Panel -->
-      <div v-if="selectedTask" class="task-detail-panel">
-        <div class="panel-header" @click="panelCollapsed = !panelCollapsed">
-          <span class="collapse-arrow" :class="{ collapsed: panelCollapsed }">▸</span>
-          <h3>{{ selectedTask.title }}</h3>
-          <div class="panel-badges">
-            <span class="status-badge" :class="selectedTask.status">{{ statusMap[selectedTask.status] }}</span>
-            <span class="priority-badge" :class="selectedTask.priority">{{ priorityMap[selectedTask.priority] }}</span>
-          </div>
-          <button class="btn btn-ghost btn-sm panel-close" @click.stop="selectedTask = null">×</button>
-        </div>
-
-        <div v-show="!panelCollapsed" class="panel-body">
-
-        <div v-if="selectedTask.description" class="panel-desc">{{ selectedTask.description }}</div>
-
-        <!-- Timeline -->
-        <div class="panel-section">
-          <h4>工作记录</h4>
-          <TaskTimeline
-            :entries="taskMilestones"
-            :disabled="!isCurrentTaskActive"
-            @add="addMilestone"
-            @delete="deleteMilestone"
+      <!-- Main: left task list + right detail -->
+      <div class="split-view">
+        <!-- Left: Task List -->
+        <div class="split-left">
+          <TaskCard
+            v-for="task in filteredTasks"
+            :key="task.id"
+            :task="task"
+            :latest-milestone="taskLatestMap[task.id] || null"
+            :class="{ 'card-active': selectedTask?.id === task.id }"
+            @start="startWork"
+            @resume="resumeWork"
+            @edit="openEditTask"
+            @delete="confirmDeleteTask"
+            @expand="openTaskDetail"
           />
-        </div>
-
-        <!-- Session History -->
-        <div class="panel-section">
-          <h4>计时记录</h4>
-          <div v-if="taskSessions.length === 0" class="panel-empty">暂无计时记录</div>
-          <div v-for="s in taskSessions" :key="s.id" class="session-item">
-            <span class="session-time">{{ s.start_time }}</span>
-            <span v-if="s.end_time" class="session-dash">→</span>
-            <span v-if="s.end_time" class="session-time">{{ s.end_time }}</span>
-            <span class="session-duration">{{ formatDuration(s.duration) }}</span>
-            <span class="session-status" :class="s.status">{{ sessionStatusMap[s.status] }}</span>
+          <div v-if="filteredTasks.length === 0" class="empty-state">
+            <p>暂无任务</p>
+            <p class="sub">点击"新建任务"开始管理</p>
           </div>
         </div>
+
+        <!-- Right: Task Detail -->
+        <div v-if="selectedTask" class="split-right">
+          <div class="detail-panel">
+            <div class="panel-header">
+              <div class="panel-badges">
+                <span class="status-badge" :class="selectedTask.status">{{ statusMap[selectedTask.status] }}</span>
+                <span class="priority-badge" :class="selectedTask.priority">{{ priorityMap[selectedTask.priority] }}</span>
+              </div>
+              <h3>{{ selectedTask.title }}</h3>
+            </div>
+
+            <div v-if="selectedTask.description" class="panel-desc">{{ selectedTask.description }}</div>
+
+            <!-- Timeline -->
+            <div class="panel-section">
+              <h4>工作记录</h4>
+              <TaskTimeline
+                :entries="taskMilestones"
+                :disabled="!isCurrentTaskActive"
+                @add="addMilestone"
+                @delete="deleteMilestone"
+              />
+            </div>
+
+            <!-- Session History -->
+            <div class="panel-section">
+              <h4>计时记录</h4>
+              <div v-if="taskSessions.length === 0" class="panel-empty">暂无计时记录</div>
+              <div v-for="s in taskSessions" :key="s.id" class="session-item">
+                <span class="session-time">{{ s.start_time }}</span>
+                <span v-if="s.end_time" class="session-dash">→</span>
+                <span v-if="s.end_time" class="session-time">{{ s.end_time }}</span>
+                <span class="session-duration">{{ formatDuration(s.duration) }}</span>
+                <span class="session-status" :class="s.status">{{ sessionStatusMap[s.status] }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right placeholder when no task selected -->
+        <div v-else class="split-right split-empty">
+          <p>← 点击任务查看详情</p>
         </div>
       </div>
     </div>
@@ -163,7 +169,6 @@ const taskForm = ref({ title: '', description: '', priority: 'medium' })
 const taskMilestones = ref<{ id: number; content: string; created_at: string }[]>([])
 const taskSessions = ref<any[]>([])
 const taskLatestMap = ref<Record<number, { content: string; created_at: string }>>({})
-const panelCollapsed = ref(false)
 
 const statusMap: Record<string, string> = {
   todo: '待办',
@@ -284,7 +289,6 @@ function selectTask(task: Task) {
 
 function openTaskDetail(task: Task) {
   selectedTask.value = task
-  panelCollapsed.value = false
 }
 
 async function startWork(task: Task) {
@@ -332,14 +336,17 @@ function formatDuration(seconds: number): string {
 
 <style scoped>
 .project-detail {
-  max-width: 1000px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .detail-header {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
 }
 
 .header-info {
@@ -350,7 +357,7 @@ function formatDuration(seconds: number): string {
 }
 
 .header-info h1 {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
 }
 
@@ -365,8 +372,8 @@ function formatDuration(seconds: number): string {
 }
 
 .color-dot {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
 }
 
@@ -374,9 +381,10 @@ function formatDuration(seconds: number): string {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   gap: 16px;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .task-filters {
@@ -390,10 +398,62 @@ function formatDuration(seconds: number): string {
   opacity: 0.7;
 }
 
-.task-list {
+/* Split View */
+.split-view {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.split-left {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  padding-right: 16px;
+  border-right: 1px solid var(--border);
+  margin-right: 16px;
+}
+
+.split-left::-webkit-scrollbar {
+  width: 4px;
+}
+
+.split-left::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.split-left {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.split-right {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.split-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.card-active {
+  border-color: var(--accent);
+  background: #f8faff;
 }
 
 .empty-state {
@@ -407,52 +467,33 @@ function formatDuration(seconds: number): string {
   margin-top: 4px;
 }
 
-/* Task Detail Panel */
-.task-detail-panel {
-  margin-top: 24px;
+/* Detail Panel */
+.detail-panel {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px;
-}
-
-.panel-body {
-  overflow: hidden;
+  position: sticky;
+  top: 0;
 }
 
 .panel-header {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-  cursor: pointer;
-  user-select: none;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
 }
 
 .panel-header h3 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  flex: 1;
-}
-
-.collapse-arrow {
-  font-size: 12px;
-  transition: transform 0.2s;
-  color: var(--text-muted);
-}
-
-.collapse-arrow.collapsed {
-  transform: rotate(-90deg);
 }
 
 .panel-badges {
   display: flex;
   gap: 6px;
-}
-
-.panel-close {
-  font-size: 18px;
-  padding: 2px 8px;
 }
 
 .status-badge {
@@ -476,13 +517,10 @@ function formatDuration(seconds: number): string {
 .priority-badge.medium { background: #fffbeb; color: #b45309; }
 .priority-badge.low { background: #f0fdf4; color: #16a34a; }
 
-
 .panel-desc {
   color: var(--text-secondary);
   font-size: 13px;
   margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
 }
 
 .panel-section {
