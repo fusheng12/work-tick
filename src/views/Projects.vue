@@ -114,12 +114,13 @@ async function saveProject() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .page-title {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
+  letter-spacing: -0.3px;
 }
 
 .modal-overlay {
@@ -128,35 +129,51 @@ async function saveProject() {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
+  animation: fadeIn 0.2s ease;
 }
 
 .modal {
   background: var(--bg-card);
   border-radius: var(--radius);
-  padding: 24px;
-  width: 420px;
+  padding: 28px;
+  width: 440px;
   max-width: 90vw;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .modal h2 {
   font-size: 18px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  font-weight: 600;
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .form-group label {
   display: block;
   font-size: 13px;
+  font-weight: 500;
   color: var(--text-secondary);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .form-group textarea {
@@ -165,43 +182,54 @@ async function saveProject() {
 
 .color-picker {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .color-option {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   border: 3px solid transparent;
-  transition: border-color 0.2s;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.color-option:hover {
+  transform: scale(1.15);
 }
 
 .color-option.active {
-  border-color: var(--accent);
+  border-color: var(--text-primary);
+  box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 4px var(--text-primary);
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 20px;
+  gap: 10px;
+  margin-top: 24px;
 }
 
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .empty-state {
   text-align: center;
-  padding: 64px 0;
+  padding: 80px 0;
   color: var(--text-muted);
+}
+
+.empty-state p:first-child {
+  font-size: 16px;
+  margin-bottom: 8px;
 }
 
 .empty-state .sub {
   font-size: 13px;
-  margin-top: 8px;
+  color: var(--border);
 }
 </style>

@@ -74,13 +74,14 @@ function formatDate(dateStr: string): string {
 .task-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   overflow: hidden;
-  transition: box-shadow 0.15s;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
 }
 
 .task-card:hover {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow);
 }
 
 .task-card.priority-high { border-left: 3px solid var(--danger); }
@@ -89,10 +90,15 @@ function formatDate(dateStr: string): string {
 
 .card-main {
   display: flex;
-  align-items: center;
-  padding: 12px 16px;
+  align-items: flex-start;
+  padding: 14px 16px;
   gap: 16px;
   cursor: pointer;
+  transition: background 0.15s;
+}
+
+.card-main:hover {
+  background: rgba(0, 0, 0, 0.01);
 }
 
 .card-info {
@@ -113,12 +119,12 @@ function formatDate(dateStr: string): string {
   flex-shrink: 0;
 }
 
-.priority-dot.high { background: var(--danger); }
-.priority-dot.medium { background: var(--warning); }
-.priority-dot.low { background: var(--success); }
+.priority-dot.high { background: var(--danger); box-shadow: 0 0 6px rgba(239, 68, 68, 0.3); }
+.priority-dot.medium { background: var(--warning); box-shadow: 0 0 6px rgba(245, 158, 11, 0.3); }
+.priority-dot.low { background: var(--success); box-shadow: 0 0 6px rgba(16, 185, 129, 0.3); }
 
 .card-title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--text-primary);
   overflow: hidden;
@@ -127,21 +133,22 @@ function formatDate(dateStr: string): string {
 }
 
 .status-tag {
-  font-size: 12px;
+  font-size: 11px;
   padding: 2px 10px;
-  border-radius: 10px;
+  border-radius: 20px;
   flex-shrink: 0;
   white-space: nowrap;
+  font-weight: 500;
 }
 
-.status-tag.todo { background: #eff6ff; color: #3b82f6; }
-.status-tag.in_progress { background: #fef3c7; color: #d97706; }
-.status-tag.completed { background: #f0fdf4; color: #16a34a; }
-.status-tag.shelved { background: #f3f4f6; color: #9ca3af; }
+.status-tag.todo { background: var(--accent-light); color: var(--accent); }
+.status-tag.in_progress { background: var(--warning-light); color: #d97706; }
+.status-tag.completed { background: var(--success-light); color: var(--success); }
+.status-tag.shelved { background: rgba(0, 0, 0, 0.04); color: var(--text-muted); }
 
 .card-latest {
   margin-top: 6px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -164,10 +171,10 @@ function formatDate(dateStr: string): string {
 
 .card-meta {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  padding-top: 2px;
 }
 
 .meta-date {
@@ -184,14 +191,14 @@ function formatDate(dateStr: string): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-xs);
   border: none;
   background: none;
   color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.1s;
+  transition: var(--transition);
 }
 
 .action-btn:hover {
@@ -201,24 +208,26 @@ function formatDate(dateStr: string): string {
 
 .action-btn.start {
   width: auto;
-  padding: 0 10px;
+  padding: 0 12px;
   font-size: 12px;
   color: #fff;
   background: var(--accent);
-  opacity: 1;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(79, 110, 247, 0.3);
 }
 
 .action-btn.start:hover {
   background: var(--accent-hover);
+  box-shadow: 0 4px 10px rgba(79, 110, 247, 0.4);
 }
 
 .action-btn.resume {
   width: auto;
-  padding: 0 10px;
+  padding: 0 12px;
   font-size: 12px;
   color: #fff;
   background: var(--warning);
-  opacity: 1;
+  font-weight: 500;
 }
 
 .action-btn.resume:hover {
@@ -226,7 +235,7 @@ function formatDate(dateStr: string): string {
 }
 
 .action-btn.danger:hover {
-  background: #fef2f2;
+  background: var(--danger-light);
   color: var(--danger);
 }
 </style>

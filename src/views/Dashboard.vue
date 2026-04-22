@@ -1,37 +1,69 @@
 <template>
   <div class="dashboard">
-    <h1 class="page-title">仪表盘</h1>
+    <div class="page-header">
+      <h1 class="page-title">仪表盘</h1>
+      <p class="page-subtitle">今日工作概览</p>
+    </div>
 
     <div class="stats-cards">
       <div class="stat-card">
-        <div class="stat-value">{{ formatDuration(todaySummary.total_seconds) }}</div>
-        <div class="stat-label">今日工时</div>
+        <div class="stat-icon-wrap stat-icon--time">
+          <span class="stat-icon">⏱</span>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ formatDuration(todaySummary.total_seconds) }}</div>
+          <div class="stat-label">今日工时</div>
+        </div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{{ todaySummary.session_count }}</div>
-        <div class="stat-label">今日工作次数</div>
+        <div class="stat-icon-wrap stat-icon--sessions">
+          <span class="stat-icon">🔄</span>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ todaySummary.session_count }}</div>
+          <div class="stat-label">工作次数</div>
+        </div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{{ todaySummary.completedTasks || 0 }}</div>
-        <div class="stat-label">今日完成任务</div>
+        <div class="stat-icon-wrap stat-icon--done">
+          <span class="stat-icon">✅</span>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ todaySummary.completedTasks || 0 }}</div>
+          <div class="stat-label">完成任务</div>
+        </div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{{ projects.length }}</div>
-        <div class="stat-label">总项目数</div>
+        <div class="stat-icon-wrap stat-icon--projects">
+          <span class="stat-icon">📁</span>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ projects.length }}</div>
+          <div class="stat-label">总项目数</div>
+        </div>
       </div>
     </div>
 
     <div class="section">
-      <h2 class="section-title">待办任务</h2>
+      <div class="section-header">
+        <h2 class="section-title">待办任务</h2>
+        <span class="task-count" v-if="todoTasks.length">{{ todoTasks.length }} 项</span>
+      </div>
       <div v-if="todoTasks.length === 0" class="empty-hint">
+        <div class="empty-icon">📋</div>
         <p>暂无待办任务</p>
+        <p class="empty-sub">创建项目并添加任务后，任务会显示在这里</p>
       </div>
       <div class="quick-task-list">
         <div v-for="t in todoTasks.slice(0, 8)" :key="t.id" class="quick-task-item" @click="startWork(t)">
           <span class="priority-dot" :class="t.priority"></span>
-          <span class="task-name">{{ t.title }}</span>
-          <span class="task-project" :style="{ color: getProjectColor(t.project_id) }">{{ getProjectName(t.project_id) }}</span>
-          <button class="btn btn-primary btn-sm">开始</button>
+          <div class="task-info">
+            <span class="task-name">{{ t.title }}</span>
+          </div>
+          <span class="task-tag" :style="{ background: getProjectTagBg(t.project_id), color: getProjectColor(t.project_id) }">
+            {{ getProjectName(t.project_id) }}
+          </span>
+          <button class="btn btn-start">开始</button>
         </div>
       </div>
     </div>
@@ -59,6 +91,17 @@ function getProjectName(projectId: number): string {
 
 function getProjectColor(projectId: number): string {
   return projects.value.find(p => p.id === projectId)?.color || 'var(--text-muted)'
+}
+
+function getProjectTagBg(projectId: number): string {
+  const color = getProjectColor(projectId)
+  if (color.startsWith('#')) {
+    const r = parseInt(color.slice(1, 3), 16)
+    const g = parseInt(color.slice(3, 5), 16)
+    const b = parseInt(color.slice(5, 7), 16)
+    return `rgba(${r}, ${g}, ${b}, 0.1)`
+  }
+  return color.replace(')', ', 0.1)').replace('rgb(', 'rgba(')
 }
 
 onMounted(async () => {
@@ -99,10 +142,21 @@ function formatDuration(seconds: number): string {
   max-width: 1000px;
 }
 
+.page-header {
+  margin-bottom: 28px;
+}
+
 .page-title {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
-  margin-bottom: 24px;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 4px;
 }
 
 .stats-cards {
@@ -114,61 +168,139 @@ function formatDuration(seconds: number): string {
 
 .stat-card {
   background: var(--bg-card);
-  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  transition: var(--transition);
+}
+
+.stat-card:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+
+.stat-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon {
+  font-size: 20px;
+}
+
+.stat-icon--time {
+  background: var(--accent-light);
+}
+
+.stat-icon--sessions {
+  background: var(--info-light);
+}
+
+.stat-icon--done {
+  background: var(--success-light);
+}
+
+.stat-icon--projects {
+  background: var(--warning-light);
+}
+
+.stat-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .stat-value {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--text-primary);
+  line-height: 1.2;
 }
 
 .stat-label {
   font-size: 13px;
-  color: var(--text-secondary);
-  margin-top: 4px;
+  color: var(--text-muted);
+  margin-top: 2px;
 }
 
 .section {
   margin-bottom: 32px;
 }
 
-.section-title {
-  font-size: 18px;
-  font-weight: 600;
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 16px;
-  color: var(--text-secondary);
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.task-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--bg-hover);
+  padding: 2px 10px;
+  border-radius: 20px;
 }
 
 .empty-hint {
   text-align: center;
-  padding: 24px;
+  padding: 48px 24px;
   color: var(--text-muted);
+}
+
+.empty-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.empty-hint p {
+  font-size: 14px;
+}
+
+.empty-sub {
+  font-size: 12px;
+  margin-top: 6px;
+  color: var(--border);
 }
 
 .quick-task-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .quick-task-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: 12px;
+  padding: 12px 16px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
 }
 
 .quick-task-item:hover {
-  background: var(--bg-hover);
+  box-shadow: var(--shadow);
+  border-color: var(--accent);
+  transform: translateX(2px);
 }
 
 .priority-dot {
@@ -178,17 +310,58 @@ function formatDuration(seconds: number): string {
   flex-shrink: 0;
 }
 
-.priority-dot.high { background: var(--danger); }
-.priority-dot.medium { background: var(--warning); }
-.priority-dot.low { background: var(--success); }
-
-.task-name {
-  flex: 1;
-  font-size: 14px;
+.priority-dot.high {
+  background: var(--danger);
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.3);
 }
 
-.task-project {
-  font-size: 12px;
+.priority-dot.medium {
+  background: var(--warning);
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.3);
+}
+
+.priority-dot.low {
+  background: var(--success);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.3);
+}
+
+.task-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-name {
+  font-size: 14px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.task-tag {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 20px;
   flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.btn-start {
+  background: var(--accent-light);
+  color: var(--accent);
+  padding: 5px 14px;
+  border-radius: var(--radius-xs);
+  font-size: 12px;
+  font-weight: 600;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.btn-start:hover {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(79, 110, 247, 0.3);
 }
 </style>

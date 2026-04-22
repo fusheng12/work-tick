@@ -47,6 +47,7 @@
             @expand="openTaskDetail"
           />
           <div v-if="filteredTasks.length === 0" class="empty-state">
+            <div class="empty-icon">📝</div>
             <p>暂无任务</p>
             <p class="sub">点击"新建任务"开始管理</p>
           </div>
@@ -81,9 +82,9 @@
               <h4>计时记录</h4>
               <div v-if="taskSessions.length === 0" class="panel-empty">暂无计时记录</div>
               <div v-for="s in taskSessions" :key="s.id" class="session-item">
-                <span class="session-time">{{ s.start_time }}</span>
+                <span class="session-time">{{ formatSessionTime(s.start_time) }}</span>
                 <span v-if="s.end_time" class="session-dash">→</span>
-                <span v-if="s.end_time" class="session-time">{{ s.end_time }}</span>
+                <span v-if="s.end_time" class="session-time">{{ formatSessionTime(s.end_time) }}</span>
                 <span class="session-duration">{{ formatDuration(s.duration) }}</span>
                 <span class="session-status" :class="s.status">{{ sessionStatusMap[s.status] }}</span>
               </div>
@@ -93,7 +94,10 @@
 
         <!-- Right placeholder when no task selected -->
         <div v-else class="split-right split-empty">
-          <p>← 点击任务查看详情</p>
+          <div class="empty-placeholder">
+            <div class="empty-placeholder-icon">📋</div>
+            <p>点击任务查看详情</p>
+          </div>
         </div>
       </div>
     </div>
@@ -131,9 +135,9 @@
 
     <!-- Delete Confirm Modal -->
     <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="showDeleteConfirm = false">
-      <div class="modal">
+      <div class="modal modal-sm">
         <h2>确认删除</h2>
-        <p>删除项目将同时删除所有相关任务和记录，此操作不可恢复。</p>
+        <p class="modal-desc">删除项目将同时删除所有相关任务和记录，此操作不可恢复。</p>
         <div class="form-actions">
           <button class="btn btn-ghost" @click="showDeleteConfirm = false">取消</button>
           <button class="btn btn-danger" @click="deleteProject">确认删除</button>
@@ -282,11 +286,6 @@ async function confirmDeleteTask(task: Task) {
   }
 }
 
-function selectTask(task: Task) {
-  selectedTask.value = task
-  panelCollapsed.value = false
-}
-
 function openTaskDetail(task: Task) {
   selectedTask.value = task
 }
@@ -332,6 +331,11 @@ function formatDuration(seconds: number): string {
   if (h > 0) return `${h}小时${m > 0 ? m + '分钟' : ''}`
   return `${m}分钟`
 }
+
+function formatSessionTime(dateStr: string): string {
+  const d = new Date(dateStr)
+  return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+}
 </script>
 
 <style scoped>
@@ -345,7 +349,7 @@ function formatDuration(seconds: number): string {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   flex-shrink: 0;
 }
 
@@ -354,34 +358,43 @@ function formatDuration(seconds: number): string {
   align-items: center;
   gap: 10px;
   flex: 1;
+  min-width: 0;
 }
 
 .header-info h1 {
   font-size: 22px;
   font-weight: 700;
+  letter-spacing: -0.3px;
 }
 
 .header-desc {
-  color: var(--text-secondary);
-  font-size: 14px;
+  color: var(--text-muted);
+  font-size: 13px;
+  background: var(--bg-hover);
+  padding: 2px 10px;
+  border-radius: 20px;
+  flex-shrink: 0;
 }
 
 .header-actions {
   display: flex;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .color-dot {
   width: 14px;
   height: 14px;
   border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.04);
 }
 
 .task-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   gap: 16px;
   flex-wrap: wrap;
   flex-shrink: 0;
@@ -403,6 +416,7 @@ function formatDuration(seconds: number): string {
   display: flex;
   flex: 1;
   min-height: 0;
+  gap: 0;
 }
 
 .split-left {
@@ -411,7 +425,7 @@ function formatDuration(seconds: number): string {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   padding-right: 16px;
   border-right: 1px solid var(--border);
   margin-right: 16px;
@@ -426,15 +440,6 @@ function formatDuration(seconds: number): string {
   border-radius: 2px;
 }
 
-.split-left {
-  flex: 1;
-  min-width: 0;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
 .split-right {
   flex: 1;
   min-width: 0;
@@ -445,15 +450,29 @@ function formatDuration(seconds: number): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px dashed var(--border);
+  border: 1.5px dashed var(--border);
   border-radius: var(--radius);
+}
+
+.empty-placeholder {
+  text-align: center;
   color: var(--text-muted);
+}
+
+.empty-placeholder-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.empty-placeholder p {
   font-size: 14px;
 }
 
 .card-active {
-  border-color: var(--accent);
-  background: #f8faff;
+  border-color: var(--accent) !important;
+  background: var(--accent-light) !important;
+  box-shadow: var(--shadow) !important;
 }
 
 .empty-state {
@@ -462,9 +481,20 @@ function formatDuration(seconds: number): string {
   color: var(--text-muted);
 }
 
+.empty-state .empty-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.empty-state p {
+  font-size: 14px;
+}
+
 .empty-state .sub {
   font-size: 13px;
   margin-top: 4px;
+  color: var(--border);
 }
 
 /* Detail Panel */
@@ -473,6 +503,7 @@ function formatDuration(seconds: number): string {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px;
+  box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
 }
@@ -480,15 +511,16 @@ function formatDuration(seconds: number): string {
 .panel-header {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 16px;
-  padding-bottom: 12px;
+  padding-bottom: 14px;
   border-bottom: 1px solid var(--border);
 }
 
 .panel-header h3 {
   font-size: 16px;
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .panel-badges {
@@ -497,30 +529,33 @@ function formatDuration(seconds: number): string {
 }
 
 .status-badge {
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 4px;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 500;
 }
 
-.status-badge.todo { background: #eff6ff; color: #2563eb; }
-.status-badge.in_progress { background: #fef3c7; color: #b45309; }
-.status-badge.completed { background: #f0fdf4; color: #16a34a; }
-.status-badge.shelved { background: var(--bg-hover); color: var(--text-muted); }
+.status-badge.todo { background: var(--accent-light); color: var(--accent); }
+.status-badge.in_progress { background: var(--warning-light); color: #d97706; }
+.status-badge.completed { background: var(--success-light); color: var(--success); }
+.status-badge.shelved { background: rgba(0, 0, 0, 0.04); color: var(--text-muted); }
 
 .priority-badge {
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 4px;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 500;
 }
 
-.priority-badge.high { background: #fef2f2; color: var(--danger); }
-.priority-badge.medium { background: #fffbeb; color: #b45309; }
-.priority-badge.low { background: #f0fdf4; color: #16a34a; }
+.priority-badge.high { background: var(--danger-light); color: var(--danger); }
+.priority-badge.medium { background: var(--warning-light); color: #d97706; }
+.priority-badge.low { background: var(--success-light); color: var(--success); }
 
 .panel-desc {
   color: var(--text-secondary);
   font-size: 13px;
   margin-bottom: 16px;
+  line-height: 1.6;
 }
 
 .panel-section {
@@ -528,52 +563,74 @@ function formatDuration(seconds: number): string {
 }
 
 .panel-section h4 {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
 }
 
 .panel-empty {
   color: var(--text-muted);
   font-size: 13px;
   text-align: center;
-  padding: 12px;
+  padding: 16px;
 }
 
 .session-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 0;
+  padding: 8px 10px;
   font-size: 13px;
+  border-radius: var(--radius-xs);
+  transition: background 0.15s;
+}
+
+.session-item:hover {
+  background: var(--bg-hover);
 }
 
 .session-time {
   color: var(--text-primary);
-  font-family: 'Consolas', monospace;
+  font-family: 'SF Mono', 'Consolas', monospace;
+  font-size: 12px;
 }
 
 .session-dash {
   color: var(--text-muted);
+  font-size: 12px;
 }
 
 .session-duration {
   color: var(--accent);
   font-weight: 600;
   margin-left: auto;
+  font-size: 13px;
 }
 
 .session-status {
   font-size: 11px;
-  padding: 1px 6px;
-  border-radius: 3px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
   background: var(--bg-hover);
   color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
 .session-status.completed {
-  background: #f0fdf4;
-  color: #16a34a;
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.session-status.running {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.session-status.paused {
+  background: var(--warning-light);
+  color: #d97706;
 }
 
 /* Modal */
@@ -583,35 +640,62 @@ function formatDuration(seconds: number): string {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
+  animation: fadeIn 0.2s ease;
 }
 
 .modal {
   background: var(--bg-card);
   border-radius: var(--radius);
-  padding: 24px;
+  padding: 28px;
   width: 440px;
   max-width: 90vw;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-sm {
+  width: 400px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .modal h2 {
   font-size: 18px;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.modal-desc {
+  color: var(--text-muted);
+  font-size: 14px;
   margin-bottom: 20px;
+  line-height: 1.6;
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .form-group label {
   display: block;
   font-size: 13px;
+  font-weight: 500;
   color: var(--text-secondary);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .form-group textarea {
@@ -624,38 +708,38 @@ function formatDuration(seconds: number): string {
 }
 
 .priority-option {
-  padding: 6px 16px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  padding: 7px 18px;
+  border-radius: var(--radius-xs);
+  border: 1.5px solid var(--border);
   background: var(--bg-secondary);
   color: var(--text-secondary);
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: var(--transition);
 }
 
 .priority-option.high.active {
-  background: #fef2f2;
+  background: var(--danger-light);
   color: var(--danger);
   border-color: var(--danger);
 }
 
 .priority-option.medium.active {
-  background: #fffbeb;
-  color: #b45309;
-  border-color: #f59e0b;
+  background: var(--warning-light);
+  color: #d97706;
+  border-color: var(--warning);
 }
 
 .priority-option.low.active {
-  background: #f0fdf4;
-  color: #16a34a;
-  border-color: #22c55e;
+  background: var(--success-light);
+  color: var(--success);
+  border-color: var(--success);
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 20px;
+  gap: 10px;
+  margin-top: 24px;
 }
 </style>

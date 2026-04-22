@@ -15,7 +15,9 @@
           <span class="timeline-text">{{ entry.content }}</span>
           <span class="timeline-time">{{ formatTime(entry.created_at) }}</span>
         </div>
-        <button v-if="!disabled" class="btn btn-ghost btn-sm timeline-delete" @click="$emit('delete', entry.id)">×</button>
+        <button v-if="!disabled" class="btn btn-ghost btn-sm timeline-delete" @click="$emit('delete', entry.id)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
       <div v-if="entries.length === 0" class="timeline-empty">暂无记录</div>
     </div>
@@ -44,7 +46,16 @@ function addEntry() {
 }
 
 function formatTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleString('zh-CN')
+  const d = new Date(dateStr)
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const target = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+  const diff = Math.floor((today.getTime() - target.getTime()) / 86400000)
+  const time = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+
+  if (diff === 0) return `今天 ${time}`
+  if (diff === 1) return `昨天 ${time}`
+  return `${d.getMonth() + 1}/${d.getDate()} ${time}`
 }
 </script>
 
@@ -79,6 +90,7 @@ function formatTime(dateStr: string): string {
   bottom: 8px;
   width: 2px;
   background: var(--border);
+  border-radius: 1px;
 }
 
 .timeline-item {
@@ -104,13 +116,13 @@ function formatTime(dateStr: string): string {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .timeline-text {
   font-size: 13px;
   color: var(--text-primary);
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .timeline-time {
@@ -120,15 +132,19 @@ function formatTime(dateStr: string): string {
 
 .timeline-delete {
   opacity: 0;
-  transition: opacity 0.15s;
+  transition: var(--transition);
   flex-shrink: 0;
-  font-size: 16px;
-  line-height: 1;
-  padding: 2px 6px;
+  padding: 4px;
+  border-radius: var(--radius-xs);
 }
 
 .timeline-item:hover .timeline-delete {
   opacity: 1;
+}
+
+.timeline-delete:hover {
+  background: var(--danger-light);
+  color: var(--danger);
 }
 
 .timeline-empty {

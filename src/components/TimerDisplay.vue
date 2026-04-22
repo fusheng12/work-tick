@@ -24,20 +24,24 @@ const formatted = computed(() => {
 <style scoped>
 .timer-display {
   text-align: center;
+  padding: 16px 0;
 }
 
 .timer-value {
-  font-family: 'Consolas', 'Courier New', monospace;
-  font-size: 64px;
+  font-family: 'SF Mono', 'Consolas', 'Courier New', monospace;
+  font-size: 72px;
   font-weight: 700;
-  letter-spacing: 4px;
+  letter-spacing: 6px;
   color: var(--text-primary);
-  text-shadow: 0 0 20px rgba(74, 144, 217, 0.3);
+  line-height: 1;
+  position: relative;
 }
 
 .timer-label {
   color: var(--text-muted);
   font-size: 14px;
-  margin-top: 4px;
+  margin-top: 12px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
 }
 </style>

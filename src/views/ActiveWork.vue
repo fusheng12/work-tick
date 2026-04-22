@@ -2,38 +2,41 @@
   <div class="active-work">
     <h1 class="page-title">正在工作</h1>
 
-    <div v-if="!timerStore.hasActiveSession" class="no-session">
-      <p>当前没有进行中的工作</p>
-      <p class="sub">去 <router-link to="/projects">项目列表</router-link> 选择一个任务开始</p>
-    </div>
-
-    <div v-else class="active-content">
-      <div v-if="currentTask" class="task-badge">
-        <span class="task-title">{{ currentTask.title }}</span>
-        <span class="task-project" :style="{ color: currentProject?.color }">{{ currentProject?.name }}</span>
+    <div class="active-content" :class="{ 'has-session': timerStore.hasActiveSession }">
+      <div v-if="!timerStore.hasActiveSession" class="no-session">
+        <div class="empty-icon">⏱</div>
+        <p>当前没有进行中的工作</p>
+        <p class="sub">去 <router-link to="/projects">项目列表</router-link> 选择一个任务开始</p>
       </div>
 
-      <TimerDisplay :seconds="timerStore.elapsedSeconds" :label="timerLabel" />
+      <template v-else>
+        <div v-if="currentTask" class="task-badge">
+          <span class="task-title">{{ currentTask.title }}</span>
+          <span class="task-project" :style="{ color: currentProject?.color }">{{ currentProject?.name }}</span>
+        </div>
 
-      <div class="timer-actions">
-        <template v-if="timerStore.isRunning">
-          <button class="btn btn-warning btn-lg" @click="timerStore.pauseSession()">⏸ 暂停</button>
-          <button class="btn btn-danger btn-lg" @click="showStopDialog = true">⏹ 停止</button>
-        </template>
-        <template v-else-if="timerStore.isPaused">
-          <button class="btn btn-success btn-lg" @click="timerStore.resumeSession()">▶ 继续</button>
-          <button class="btn btn-danger btn-lg" @click="showStopDialog = true">⏹ 停止</button>
-        </template>
-      </div>
+        <TimerDisplay :seconds="timerStore.elapsedSeconds" :label="timerLabel" />
 
-      <div class="timeline-section">
-        <h3 class="section-title">工作记录</h3>
-        <TaskTimeline
-          :entries="milestones"
-          @add="addMilestone"
-          @delete="deleteMilestone"
-        />
-      </div>
+        <div class="timer-actions">
+          <template v-if="timerStore.isRunning">
+            <button class="btn btn-warning btn-lg" @click="timerStore.pauseSession()">⏸ 暂停</button>
+            <button class="btn btn-danger btn-lg" @click="showStopDialog = true">⏹ 停止</button>
+          </template>
+          <template v-else-if="timerStore.isPaused">
+            <button class="btn btn-success btn-lg" @click="timerStore.resumeSession()">▶ 继续</button>
+            <button class="btn btn-danger btn-lg" @click="showStopDialog = true">⏹ 停止</button>
+          </template>
+        </div>
+
+        <div class="timeline-section">
+          <h3 class="section-title">工作记录</h3>
+          <TaskTimeline
+            :entries="milestones"
+            @add="addMilestone"
+            @delete="deleteMilestone"
+          />
+        </div>
+      </template>
     </div>
 
     <!-- Stop dialog with status selection -->
@@ -137,55 +140,75 @@ async function stopWork(status: string) {
 
 <style scoped>
 .active-work {
-  max-width: 700px;
-  margin: 0 auto;
+  max-width: 1000px;
 }
 
 .page-title {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  letter-spacing: -0.3px;
+}
+
+.active-content {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .no-session {
-  text-align: center;
-  padding: 64px 0;
+  padding: 80px 0;
   color: var(--text-muted);
+}
+
+.no-session .empty-icon {
+  font-size: 40px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+.no-session p {
+  font-size: 14px;
 }
 
 .no-session .sub {
   font-size: 13px;
   margin-top: 8px;
+  color: var(--text-muted);
 }
 
 .no-session a {
   color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
 }
 
-.active-content {
-  text-align: center;
+.no-session a:hover {
+  text-decoration: underline;
 }
 
 .task-badge {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 10px 20px;
+  gap: 6px;
+  padding: 14px 28px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   margin-bottom: 32px;
+  box-shadow: var(--shadow-sm);
 }
 
 .task-title {
   font-size: 16px;
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .task-project {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .timer-actions {
@@ -197,9 +220,15 @@ async function stopWork(status: string) {
 }
 
 .btn-lg {
-  padding: 12px 32px;
-  font-size: 16px;
-  border-radius: var(--radius);
+  padding: 12px 36px;
+  font-size: 15px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.btn-lg:active {
+  transform: scale(0.97);
 }
 
 .timeline-section {
@@ -213,7 +242,7 @@ async function stopWork(status: string) {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 12px;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 /* Modal */
@@ -223,73 +252,92 @@ async function stopWork(status: string) {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
+  animation: fadeIn 0.2s ease;
 }
 
 .modal {
   background: var(--bg-card);
   border-radius: var(--radius);
-  padding: 24px;
-  width: 400px;
+  padding: 28px;
+  width: 420px;
   max-width: 90vw;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .modal h2 {
   font-size: 18px;
   margin-bottom: 8px;
+  font-weight: 600;
 }
 
 .modal-desc {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 14px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .status-options {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 20px;
 }
 
 .status-option {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: 14px;
+  padding: 14px 18px;
   border: 2px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   background: var(--bg-secondary);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: var(--transition);
   text-align: left;
 }
 
 .status-option:hover {
   border-color: var(--accent);
-  background: var(--bg-hover);
+  background: var(--accent-light);
+  transform: translateX(2px);
 }
 
 .status-option.completed:hover {
-  border-color: #22c55e;
+  border-color: var(--success);
+  background: var(--success-light);
 }
 
 .status-option.in_progress:hover {
-  border-color: #f59e0b;
+  border-color: var(--warning);
+  background: var(--warning-light);
 }
 
 .status-option.shelved:hover {
   border-color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.02);
 }
 
 .status-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -298,17 +346,17 @@ async function stopWork(status: string) {
 }
 
 .completed .status-icon {
-  background: #f0fdf4;
-  color: #22c55e;
+  background: var(--success-light);
+  color: var(--success);
 }
 
 .in_progress .status-icon {
-  background: #fffbeb;
-  color: #f59e0b;
+  background: var(--warning-light);
+  color: var(--warning);
 }
 
 .shelved .status-icon {
-  background: var(--bg-hover);
+  background: rgba(0, 0, 0, 0.04);
   color: var(--text-muted);
 }
 
@@ -327,6 +375,6 @@ async function stopWork(status: string) {
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 10px;
 }
 </style>
