@@ -86,7 +86,7 @@
                 <span v-if="s.end_time" class="session-dash">→</span>
                 <span v-if="s.end_time" class="session-time">{{ formatSessionTime(s.end_time) }}</span>
                 <span class="session-duration">{{ formatDuration(s.duration) }}</span>
-                <span class="session-status" :class="s.status">{{ sessionStatusMap[s.status] }}</span>
+                <span class="session-status" :class="s.task_status || s.status">{{ taskStatusLabel(s.task_status || s.status) }}</span>
               </div>
             </div>
           </div>
@@ -188,10 +188,12 @@ const priorityMap: Record<string, string> = {
 }
 
 const sessionStatusMap: Record<string, string> = {
-  running: '运行中',
+  running: '计时中',
   paused: '已暂停',
-  completed: '已完成',
+  completed: '已停止计时',
 }
+
+const taskStatusLabel = (status: string) => statusMap[status] || status
 
 const priorities = [
   { value: 'high', label: '高优先级' },
@@ -233,6 +235,13 @@ onMounted(async () => {
     if (ms.length > 0) {
       taskLatestMap.value[t.id] = ms[0]
     }
+  }
+
+  // Auto-select task from query
+  const queryTaskId = Number(route.query.task)
+  if (queryTaskId) {
+    const task = tasksStore.tasks.find(t => t.id === queryTaskId)
+    if (task) selectedTask.value = task
   }
 })
 
@@ -631,6 +640,21 @@ function formatSessionTime(dateStr: string): string {
 .session-status.paused {
   background: var(--warning-light);
   color: #d97706;
+}
+
+.session-status.in_progress {
+  background: var(--warning-light);
+  color: #d97706;
+}
+
+.session-status.shelved {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-muted);
+}
+
+.session-status.todo {
+  background: var(--accent-light);
+  color: var(--accent);
 }
 
 /* Modal */

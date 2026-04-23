@@ -23,7 +23,7 @@ declare global {
       startSession: (taskId: number) => Promise<any>
       pauseSession: (id: number) => Promise<any>
       resumeSession: (id: number) => Promise<any>
-      stopSession: (id: number) => Promise<any>
+      stopSession: (id: number, taskStatus?: string) => Promise<any>
 
       // Milestones
       getMilestones: (taskId?: number, projectId?: number) => Promise<any[]>

@@ -11,8 +11,9 @@
 
       <template v-else>
         <div v-if="currentTask" class="task-badge">
-          <span class="task-title">{{ currentTask.title }}</span>
           <span class="task-project" :style="{ color: currentProject?.color }">{{ currentProject?.name }}</span>
+          <span class="task-sep">|</span>
+          <span class="task-title">{{ currentTask.title }}</span>
         </div>
 
         <TimerDisplay :seconds="timerStore.elapsedSeconds" :label="timerLabel" />
@@ -127,14 +128,14 @@ async function deleteMilestone(id: number) {
 async function stopWork(status: string) {
   const taskId = timerStore.activeSession?.task_id
   const projectId = timerStore.activeSession?.project_id
-  await timerStore.stopSession()
+  await timerStore.stopSession(status)
   if (taskId && projectId) {
     await window.api.updateTask(taskId, { status })
   }
   showStopDialog.value = false
   milestones.value = []
   currentTask.value = null
-  router.push('/projects')
+  router.push(`/projects/${projectId}?task=${taskId}`)
 }
 </script>
 
@@ -188,16 +189,19 @@ async function stopWork(status: string) {
 }
 
 .task-badge {
-  display: inline-flex;
-  flex-direction: column;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 10px;
   padding: 14px 28px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   margin-bottom: 32px;
   box-shadow: var(--shadow-sm);
+  width: 100%;
+  max-width: 700px;
+  box-sizing: border-box;
 }
 
 .task-title {
@@ -207,8 +211,13 @@ async function stopWork(status: string) {
 }
 
 .task-project {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--text-muted);
+}
+
+.task-sep {
+  font-size: 16px;
+  color: var(--border);
 }
 
 .timer-actions {

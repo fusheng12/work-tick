@@ -84,10 +84,10 @@ export const useTimerStore = defineStore('timer', () => {
     startTick()
   }
 
-  async function stopSession() {
+  async function stopSession(taskStatus?: string) {
     if (!activeSession.value) return
     stopTick()
-    await window.api.stopSession(activeSession.value.id)
+    await window.api.stopSession(activeSession.value.id, taskStatus)
     activeSession.value = null
     isRunning.value = false
     isPaused.value = false

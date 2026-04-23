@@ -96,5 +96,10 @@ function createTables() {
     db.run(`ALTER TABLE milestones ADD COLUMN task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE`)
   } catch {}
 
+  // Migration: add task_status to sessions if not exists
+  try {
+    db.run(`ALTER TABLE sessions ADD COLUMN task_status TEXT`)
+  } catch {}
+
   saveDatabase()
 }

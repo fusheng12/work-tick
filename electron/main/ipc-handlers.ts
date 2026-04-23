@@ -38,7 +38,7 @@ export function registerIpcHandlers() {
   ipcMain.handle('sessions:start', (_, taskId: number) => sessions.startSession(taskId))
   ipcMain.handle('sessions:pause', (_, id: number) => sessions.pauseSession(id))
   ipcMain.handle('sessions:resume', (_, id: number) => sessions.resumeSession(id))
-  ipcMain.handle('sessions:stop', (_, id: number) => sessions.stopSession(id))
+  ipcMain.handle('sessions:stop', (_, id: number, taskStatus?: string) => sessions.stopSession(id, taskStatus))
 
   // --- Milestones ---
   ipcMain.handle('milestones:getAll', (_, taskId?: number, projectId?: number) =>

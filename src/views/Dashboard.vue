@@ -6,7 +6,7 @@
     </div>
 
     <div class="stats-cards">
-      <div class="stat-card">
+      <div class="stat-card stat-card--hero">
         <div class="stat-icon-wrap stat-icon--time">
           <span class="stat-icon">⏱</span>
         </div>
@@ -16,21 +16,21 @@
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon-wrap stat-icon--sessions">
-          <span class="stat-icon">🔄</span>
-        </div>
-        <div class="stat-info">
-          <div class="stat-value">{{ todaySummary.session_count }}</div>
-          <div class="stat-label">工作次数</div>
-        </div>
-      </div>
-      <div class="stat-card">
         <div class="stat-icon-wrap stat-icon--done">
           <span class="stat-icon">✅</span>
         </div>
         <div class="stat-info">
           <div class="stat-value">{{ todaySummary.completedTasks || 0 }}</div>
           <div class="stat-label">完成任务</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon-wrap stat-icon--sessions">
+          <span class="stat-icon">🔄</span>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ todaySummary.activeProjects }}</div>
+          <div class="stat-label">活跃项目</div>
         </div>
       </div>
       <div class="stat-card">
@@ -129,11 +129,8 @@ async function startWork(task: any) {
 }
 
 function formatDuration(seconds: number): string {
-  if (!seconds) return '0分钟'
-  const h = Math.floor(seconds / 3600)
-  const m = Math.floor((seconds % 3600) / 60)
-  if (h > 0) return `${h}小时${m > 0 ? m + '分钟' : ''}`
-  return `${m}分钟`
+  if (!seconds) return '0h'
+  return (seconds / 3600).toFixed(1) + 'h'
 }
 </script>
 
@@ -164,6 +161,11 @@ function formatDuration(seconds: number): string {
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 32px;
+}
+
+.stat-card--hero .stat-value {
+  color: var(--accent);
+  font-size: 22px;
 }
 
 .stat-card {

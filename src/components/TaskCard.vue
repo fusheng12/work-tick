@@ -93,6 +93,7 @@ function formatDate(dateStr: string): string {
   align-items: flex-start;
   padding: 14px 16px;
   gap: 16px;
+  min-height: 72px;
   cursor: pointer;
   transition: background 0.15s;
 }

@@ -9,6 +9,7 @@ export interface Session {
   end_time: string | null
   duration: number
   status: string
+  task_status: string | null
   created_at: string
 }
 
@@ -72,7 +73,7 @@ export function resumeSession(id: number): Session {
   return queryOne('SELECT * FROM sessions WHERE id = ?', [id]) as Session
 }
 
-export function stopSession(id: number): Session {
+export function stopSession(id: number, taskStatus?: string): Session {
   const db = getDb()
   const session = queryOne('SELECT * FROM sessions WHERE id = ?', [id]) as Session
 
@@ -81,7 +82,7 @@ export function stopSession(id: number): Session {
     totalDuration += Math.floor((Date.now() - new Date(session.start_time).getTime()) / 1000)
   }
 
-  db.run("UPDATE sessions SET status = 'completed', duration = ?, end_time = datetime('now', 'localtime') WHERE id = ?", [totalDuration, id])
+  db.run("UPDATE sessions SET status = 'completed', duration = ?, end_time = datetime('now', 'localtime'), task_status = ? WHERE id = ?", [totalDuration, taskStatus || null, id])
   saveDatabase()
   return queryOne('SELECT * FROM sessions WHERE id = ?', [id]) as Session
 }

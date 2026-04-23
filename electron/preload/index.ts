@@ -25,7 +25,7 @@ const api = {
   startSession: (taskId: number) => ipcRenderer.invoke('sessions:start', taskId),
   pauseSession: (id: number) => ipcRenderer.invoke('sessions:pause', id),
   resumeSession: (id: number) => ipcRenderer.invoke('sessions:resume', id),
-  stopSession: (id: number) => ipcRenderer.invoke('sessions:stop', id),
+  stopSession: (id: number, taskStatus?: string) => ipcRenderer.invoke('sessions:stop', id, taskStatus),
 
   // Milestones
   getMilestones: (taskId?: number, projectId?: number) =>
