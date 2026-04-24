@@ -34,6 +34,7 @@ declare global {
       getDailyStats: (days: number) => Promise<any[]>
       getProjectStats: (days: number) => Promise<any[]>
       getTodaySummary: () => Promise<any>
+      getCalendarData: (year: number, month: number) => Promise<any[]>
     }
   }
 }

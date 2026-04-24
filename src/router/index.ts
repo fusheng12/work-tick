@@ -12,6 +12,7 @@ const router = createRouter({
         { path: 'projects/:id', name: 'project-detail', component: () => import('@/views/ProjectDetail.vue') },
         { path: 'active', name: 'active', component: () => import('@/views/ActiveWork.vue') },
         { path: 'statistics', name: 'statistics', component: () => import('@/views/Statistics.vue') },
+        { path: 'calendar', name: 'calendar', component: () => import('@/views/CalendarView.vue') },
       ],
     },
   ],

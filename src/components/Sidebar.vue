@@ -27,6 +27,10 @@
         <span class="nav-icon">📈</span>
         <span class="nav-text">统计分析</span>
       </router-link>
+      <router-link to="/calendar" class="nav-item" exact-active-class="active">
+        <span class="nav-icon">📅</span>
+        <span class="nav-text">工作日历</span>
+      </router-link>
     </nav>
 
     <div v-if="timerStore.hasActiveSession" class="sidebar-timer" @click="$router.push('/active')">

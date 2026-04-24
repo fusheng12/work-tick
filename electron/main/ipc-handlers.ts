@@ -106,4 +106,40 @@ export function registerIpcHandlers() {
       completedTasks: completedTasks?.count || 0,
     }
   })
+
+  ipcMain.handle('stats:calendar', (_, year: number, month: number) => {
+    const monthStr = month.toString().padStart(2, '0')
+    const startDate = `${year}-${monthStr}-01`
+    const nextMonth = month === 12 ? 1 : month + 1
+    const nextYear = month === 12 ? year + 1 : year
+    const nextMonthStr = nextMonth.toString().padStart(2, '0')
+    const endDate = `${nextYear}-${nextMonthStr}-01`
+
+    return queryAll(`
+      WITH latest AS (
+        SELECT date(start_time) AS date, project_id, task_id, task_status,
+               ROW_NUMBER() OVER (PARTITION BY date(start_time), project_id, task_id ORDER BY start_time DESC) AS rn
+        FROM sessions
+        WHERE status = 'completed'
+          AND start_time >= ? AND start_time < ?
+      )
+      SELECT agg.date,
+             agg.project_id, p.name AS project_name, p.color AS project_color,
+             agg.task_id, t.title AS task_title, l.task_status,
+             agg.total_seconds, agg.session_count
+      FROM (
+        SELECT date(start_time) AS date,
+               project_id, task_id,
+               SUM(duration) AS total_seconds, COUNT(*) AS session_count
+        FROM sessions
+        WHERE status = 'completed'
+          AND start_time >= ? AND start_time < ?
+        GROUP BY date(start_time), project_id, task_id
+      ) agg
+      INNER JOIN projects p ON p.id = agg.project_id
+      LEFT JOIN tasks t ON t.id = agg.task_id
+      LEFT JOIN latest l ON l.date = agg.date AND l.project_id = agg.project_id AND l.task_id = agg.task_id AND l.rn = 1
+      ORDER BY agg.date ASC, agg.total_seconds DESC
+    `, [startDate, endDate, startDate, endDate])
+  })
 }

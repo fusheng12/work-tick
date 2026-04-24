@@ -94,6 +94,7 @@ const dailyChartOption = computed(() => ({
   },
   yAxis: {
     type: 'value' as const,
+    minInterval: 3600,
     axisLabel: {
       color: '#9ca3af',
       fontSize: 11,
@@ -144,7 +145,7 @@ const projectPieOption = computed(() => {
       radius: ['45%', '72%'],
       center: ['50%', '50%'],
       data,
-      label: { color: '#6b7280', fontSize: 12 },
+      label: { color: '#6b7280', fontSize: 12, overflow: 'truncate', width: 80, ellipsis: '...' },
       labelLine: { lineStyle: { color: '#e8eaf0' } },
       itemStyle: { borderColor: '#fff', borderWidth: 3, borderRadius: 6 },
       emphasis: {
@@ -326,6 +327,7 @@ function formatDuration(seconds: number): string {
   width: 80px;
   text-align: right;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .rank-count {

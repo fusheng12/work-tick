@@ -38,6 +38,7 @@ const api = {
   getDailyStats: (days: number) => ipcRenderer.invoke('stats:daily', days),
   getProjectStats: (days: number) => ipcRenderer.invoke('stats:projects', days),
   getTodaySummary: () => ipcRenderer.invoke('stats:todaySummary'),
+  getCalendarData: (year: number, month: number) => ipcRenderer.invoke('stats:calendar', year, month),
 }
 
 contextBridge.exposeInMainWorld('api', api)
