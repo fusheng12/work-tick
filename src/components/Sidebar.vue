@@ -3,7 +3,9 @@
     <div class="sidebar-header">
       <div class="logo">
         <div class="logo-icon-wrap">
-          <span class="logo-icon">⏱</span>
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
+          </svg>
         </div>
         <span class="logo-text">WorkTick</span>
       </div>
@@ -12,23 +14,33 @@
     <nav class="sidebar-nav">
       <div class="nav-group-label">主菜单</div>
       <router-link to="/" class="nav-item" exact-active-class="active">
-        <span class="nav-icon">📊</span>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+        </svg>
         <span class="nav-text">仪表盘</span>
       </router-link>
       <router-link to="/projects" class="nav-item" exact-active-class="active">
-        <span class="nav-icon">📁</span>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 7V5a2 2 0 012-2h2"/><path d="M17 3h2a2 2 0 012 2v2"/><path d="M21 17v2a2 2 0 01-2 2h-2"/><path d="M7 21H5a2 2 0 01-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="2"/>
+        </svg>
         <span class="nav-text">项目管理</span>
       </router-link>
       <router-link to="/active" class="nav-item" exact-active-class="active">
-        <span class="nav-icon">▶</span>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/>
+        </svg>
         <span class="nav-text">正在工作</span>
       </router-link>
       <router-link to="/statistics" class="nav-item" exact-active-class="active">
-        <span class="nav-icon">📈</span>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>
+        </svg>
         <span class="nav-text">统计分析</span>
       </router-link>
       <router-link to="/calendar" class="nav-item" exact-active-class="active">
-        <span class="nav-icon">📅</span>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><rect x="7" y="13" width="3" height="3" rx="0.5" fill="currentColor" stroke="none"/>
+        </svg>
         <span class="nav-text">工作日历</span>
       </router-link>
     </nav>
@@ -100,8 +112,8 @@ function formatTime(seconds: number): string {
 }
 
 .logo-icon {
-  font-size: 18px;
-  filter: brightness(10);
+  width: 20px;
+  height: 20px;
 }
 
 .logo-text {
@@ -154,10 +166,18 @@ function formatTime(seconds: number): string {
 }
 
 .nav-icon {
-  font-size: 16px;
-  width: 22px;
-  text-align: center;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.nav-item:hover .nav-icon {
+  opacity: 0.9;
+}
+
+.nav-item.active .nav-icon {
+  opacity: 1;
 }
 
 .nav-text {
