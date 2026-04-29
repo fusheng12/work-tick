@@ -245,8 +245,14 @@ onMounted(() => {
 })
 
 async function loadData() {
-  selectedDay.value = null
   calendarData.value = await window.api.getCalendarData(currentYear.value, currentMonth.value)
+  const n = new Date()
+  const todayStr = `${n.getFullYear()}-${(n.getMonth() + 1).toString().padStart(2, '0')}-${n.getDate().toString().padStart(2, '0')}`
+  if (n.getFullYear() === currentYear.value && n.getMonth() + 1 === currentMonth.value && dayMap.value[todayStr]) {
+    selectedDay.value = todayStr
+  } else {
+    selectedDay.value = null
+  }
 }
 
 function prevMonth() {

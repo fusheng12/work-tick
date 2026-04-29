@@ -145,8 +145,8 @@ const projectPieOption = computed(() => {
       radius: ['45%', '72%'],
       center: ['50%', '50%'],
       data,
-      label: { color: '#6b7280', fontSize: 12, overflow: 'truncate', width: 80, ellipsis: '...' },
-      labelLine: { lineStyle: { color: '#e8eaf0' } },
+      label: { show: false },
+      labelLine: { show: false },
       itemStyle: { borderColor: '#fff', borderWidth: 3, borderRadius: 6 },
       emphasis: {
         itemStyle: { shadowBlur: 12, shadowColor: 'rgba(0,0,0,0.1)' },
