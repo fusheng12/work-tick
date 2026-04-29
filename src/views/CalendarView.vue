@@ -49,7 +49,14 @@
     <div v-if="selectedDayData" class="day-detail-card">
       <div class="day-detail-header">
         <h3>{{ selectedDayData.dateLabel }} 工作详情</h3>
-        <button class="day-detail-close" @click="selectedDay = null">&times;</button>
+        <div class="day-detail-actions">
+          <button class="gen-report-btn" :class="{ copied: reportCopied }" @click="copyDailyReport">
+            <svg v-if="!reportCopied" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ reportCopied ? '已复制' : '生成日报' }}
+          </button>
+          <button class="day-detail-close" @click="selectedDay = null">&times;</button>
+        </div>
       </div>
       <div class="day-detail-summary">
         <div class="summary-item">
@@ -290,6 +297,34 @@ function statusLabel(status: string | null): string {
   const map: Record<string, string> = { todo: '待办', in_progress: '进行中', completed: '已完成', shelved: '已搁置' }
   return status ? (map[status] || status) : '未知'
 }
+
+const reportCopied = ref(false)
+
+function copyDailyReport() {
+  if (!selectedDayData.value) return
+  const d = selectedDayData.value
+  const lines: string[] = []
+  lines.push(`# ${d.dateLabel} 工作日报`)
+  lines.push('')
+  lines.push(`**总工时**: ${formatDurationCN(d.total_seconds)} | **工作次数**: ${d.session_count}次`)
+  lines.push('')
+
+  for (const g of groupedTasks.value) {
+    lines.push(`## ${g.project_name}（${formatDurationCN(g.total_seconds)}）`)
+    lines.push('')
+    for (const t of g.tasks) {
+      const status = t.task_status ? `[${statusLabel(t.task_status)}]` : ''
+      lines.push(`- ${t.task_title || '未关联任务'} ${status} — ${formatDurationCN(t.total_seconds)}，${t.session_count}次`)
+    }
+    lines.push('')
+  }
+
+  const md = lines.join('\n')
+  navigator.clipboard.writeText(md).then(() => {
+    reportCopied.value = true
+    setTimeout(() => { reportCopied.value = false }, 2000)
+  })
+}
 </script>
 
 <style scoped>
@@ -494,6 +529,37 @@ function statusLabel(status: string | null): string {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+}
+
+.day-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gen-report-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-xs);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-light);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.gen-report-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.gen-report-btn.copied {
+  background: #10b981;
+  color: #fff;
 }
 
 .day-detail-header h3 {

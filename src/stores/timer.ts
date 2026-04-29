@@ -17,23 +17,34 @@ export const useTimerStore = defineStore('timer', () => {
   const elapsedSeconds = ref(0)
   const isRunning = ref(false)
   const isPaused = ref(false)
-  let timerInterval: ReturnType<typeof setInterval> | null = null
+  let tickInterval: ReturnType<typeof setInterval> | null = null
+  // Track the reference point for accurate elapsed time calculation
+  let refTimestamp = 0
+  let refElapsed = 0
 
   const hasActiveSession = computed(() => activeSession.value !== null)
 
   function startTick() {
     stopTick()
-    timerInterval = setInterval(() => {
-      if (isRunning.value && activeSession.value) {
-        elapsedSeconds.value++
+    refTimestamp = Date.now()
+    refElapsed = elapsedSeconds.value
+    tickInterval = setInterval(() => {
+      if (isRunning.value) {
+        elapsedSeconds.value = refElapsed + Math.floor((Date.now() - refTimestamp) / 1000)
       }
-    }, 1000)
+    }, 250)
   }
 
   function stopTick() {
-    if (timerInterval) {
-      clearInterval(timerInterval)
-      timerInterval = null
+    if (tickInterval) {
+      clearInterval(tickInterval)
+      tickInterval = null
+    }
+  }
+
+  function syncElapsed() {
+    if (isRunning.value) {
+      elapsedSeconds.value = refElapsed + Math.floor((Date.now() - refTimestamp) / 1000)
     }
   }
 
@@ -66,6 +77,7 @@ export const useTimerStore = defineStore('timer', () => {
 
   async function pauseSession() {
     if (!activeSession.value) return
+    syncElapsed()
     stopTick()
     const session = await window.api.pauseSession(activeSession.value.id)
     activeSession.value = session
@@ -86,6 +98,7 @@ export const useTimerStore = defineStore('timer', () => {
 
   async function stopSession(taskStatus?: string) {
     if (!activeSession.value) return
+    syncElapsed()
     stopTick()
     await window.api.stopSession(activeSession.value.id, taskStatus)
     activeSession.value = null

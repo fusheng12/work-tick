@@ -44,26 +44,49 @@
       </div>
     </div>
 
-    <div class="section">
-      <div class="section-header">
-        <h2 class="section-title">待办任务</h2>
-        <span class="task-count" v-if="todoTasks.length">{{ todoTasks.length }} 项</span>
-      </div>
-      <div v-if="todoTasks.length === 0" class="empty-hint">
-        <div class="empty-icon">📋</div>
-        <p>暂无待办任务</p>
-        <p class="empty-sub">创建项目并添加任务后，任务会显示在这里</p>
-      </div>
-      <div class="quick-task-list">
-        <div v-for="t in todoTasks.slice(0, 8)" :key="t.id" class="quick-task-item" @click="startWork(t)">
-          <span class="priority-dot" :class="t.priority"></span>
-          <div class="task-info">
-            <span class="task-name">{{ t.title }}</span>
+    <div class="task-panels">
+      <div class="task-panel">
+        <div class="section-header">
+          <h2 class="section-title">待办任务</h2>
+          <span class="task-count" v-if="todoTasks.length">{{ todoTasks.length }} 项</span>
+        </div>
+        <div v-if="todoTasks.length === 0" class="empty-hint empty-hint--compact">
+          <div class="empty-icon">📋</div>
+          <p>暂无待办任务</p>
+        </div>
+        <div class="quick-task-list">
+          <div v-for="t in todoTasks.slice(0, 6)" :key="t.id" class="quick-task-item" @click="startWork(t)">
+            <span class="priority-dot" :class="t.priority"></span>
+            <div class="task-info">
+              <span class="task-name">{{ t.title }}</span>
+            </div>
+            <span class="task-tag" :style="{ background: getProjectTagBg(t.project_id), color: getProjectColor(t.project_id) }">
+              {{ getProjectName(t.project_id) }}
+            </span>
+            <button class="btn btn-start">开始</button>
           </div>
-          <span class="task-tag" :style="{ background: getProjectTagBg(t.project_id), color: getProjectColor(t.project_id) }">
-            {{ getProjectName(t.project_id) }}
-          </span>
-          <button class="btn btn-start">开始</button>
+        </div>
+      </div>
+
+      <div class="task-panel">
+        <div class="section-header">
+          <h2 class="section-title">今日已完成</h2>
+          <span class="task-count task-count--success" v-if="completedToday.length">{{ completedToday.length }} 项</span>
+        </div>
+        <div v-if="completedToday.length === 0" class="empty-hint empty-hint--compact">
+          <div class="empty-icon">✅</div>
+          <p>今天还没有完成的任务</p>
+        </div>
+        <div class="quick-task-list">
+          <div v-for="t in completedToday" :key="t.id" class="quick-task-item quick-task-item--done">
+            <span class="status-check">✓</span>
+            <div class="task-info">
+              <span class="task-name task-name--done">{{ t.title }}</span>
+            </div>
+            <span class="task-tag" :style="{ background: getProjectTagBg(t.project_id), color: getProjectColor(t.project_id) }">
+              {{ getProjectName(t.project_id) }}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -82,6 +105,7 @@ const timerStore = useTimerStore()
 
 const todaySummary = ref({ total_seconds: 0, session_count: 0, activeProjects: 0, completedTasks: 0 })
 const todoTasks = ref<any[]>([])
+const completedToday = ref<any[]>([])
 
 const projects = computed(() => projectsStore.projects)
 
@@ -111,12 +135,22 @@ onMounted(async () => {
     todaySummary.value = await window.api.getTodaySummary()
   } catch {}
 
-  // Load todo tasks from all active projects
   const activeProjects = projects.value.filter(p => p.status === 'active')
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+
   for (const p of activeProjects) {
     const tasks = await window.api.getTasksByProject(p.id)
-    const todos = tasks.filter((t: any) => t.status === 'todo' || t.status === 'in_progress')
-    todoTasks.value.push(...todos)
+    for (const t of tasks) {
+      if (t.status === 'todo' || t.status === 'in_progress') {
+        todoTasks.value.push(t)
+      } else if (t.status === 'completed') {
+        const updatedAt = new Date(t.updated_at)
+        if (updatedAt >= todayStart) {
+          completedToday.value.push(t)
+        }
+      }
+    }
   }
 })
 
@@ -233,8 +267,19 @@ function formatDuration(seconds: number): string {
   margin-top: 2px;
 }
 
-.section {
+.task-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
   margin-bottom: 32px;
+}
+
+.task-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
 }
 
 .section-header {
@@ -258,26 +303,29 @@ function formatDuration(seconds: number): string {
   border-radius: 20px;
 }
 
+.task-count--success {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
 .empty-hint {
   text-align: center;
   padding: 48px 24px;
   color: var(--text-muted);
 }
 
+.empty-hint--compact {
+  padding: 36px 16px;
+}
+
 .empty-icon {
-  font-size: 40px;
-  margin-bottom: 12px;
+  font-size: 32px;
+  margin-bottom: 10px;
   opacity: 0.5;
 }
 
 .empty-hint p {
   font-size: 14px;
-}
-
-.empty-sub {
-  font-size: 12px;
-  margin-top: 6px;
-  color: var(--border);
 }
 
 .quick-task-list {
@@ -365,5 +413,34 @@ function formatDuration(seconds: number): string {
   background: var(--accent);
   color: #fff;
   box-shadow: 0 2px 8px rgba(79, 110, 247, 0.3);
+}
+
+.status-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #10b981;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.quick-task-item--done {
+  cursor: default;
+}
+
+.quick-task-item--done:hover {
+  border-color: var(--border);
+  transform: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.task-name--done {
+  text-decoration: line-through;
+  color: var(--text-muted);
 }
 </style>

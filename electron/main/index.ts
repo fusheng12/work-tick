@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, powerMonitor } from 'electron'
 import { join } from 'path'
 import { initDatabase } from '../database'
 import { registerIpcHandlers } from './ipc-handlers'
